@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Client Colyseus</title>
+        <script type="text/javascript" src="dist/colyseus.min.js"></script>
+    </head>
+    <body>
+        <h1>Client Colyseus</h1>
+        <button onclick="connect()">Connect</button>
+        <script type="text/javascript">
+
+
+            // var id = 0
+            // try {
+            //     let store = window.sessionStorage
+            //     store.id = store.id || Math.round(Math.random() * Math.pow(10, 15))
+            //     id = store.id
+            // }
+            // catch(e) {
+            //     console.log('browser storage not available')
+            // }
+
+            var idHandler = {
+
+                get: () => {
+                    try {
+                        let store = window.localStorage
+                        return store.id || 0
+                    }
+                    catch(e) {
+                        console.log("browser storage not available")
+                    }
+                }
+
+                ,set: (id) => {
+                    try {
+                        let store = window.localStorage
+                        store.id = id
+                    }
+                    catch(e) {
+                        console.log("browser storage not available")
+                    }
+                }
+
+            }
+
+
+            var connect = () => {
+
+                var roomName = "game_room"
+                var gameRoom
+
+                var client = new Colyseus('ws://192.168.11.134:3000')
+
+                client.onopen = () => {
+                    let id = idHandler.get()
+                    console.log(client.id, "connected! (previous id: "+id+")")
+
+                    gameRoom = client.join(roomName, {uid: id, score: 0})
+                    initEvent()
+
+                    idHandler.set(client.id)
+
+                }
+                client.onmessage = (event) => {
+                    console.log("client received message!", event)
+                };
+                client.onclose = (event) => {
+                    console.log("closing connection...", event)
+                    client.close()
+                }
+                client.onreconnect = (event) => {
+                    console.log("RECONNECTION")
+                    console.log(event)
+                }
+                client.onerror = (err) => {
+                    console.log("ERROR")
+                    console.log(err)
+                }
+
+                //cf. websocket.js (https://github.com/gamestdio/websocket.js)
+
+                function initEvent () {
+                    gameRoom.on('join', () => {
+                        console.log(client.id, "joined", roomName)
+                    });
+                    gameRoom.on('error', () => {
+                        console.log(client.id, "couldn't join", roomName)
+                    });
+                    gameRoom.on('leave', () => {
+                        console.log(client.id, "leaved", roomName)
+                    });
+                    gameRoom.on('data', (data) => {
+                        console.log(client.id, "received on", roomName, ":", data)
+                    });
+                    gameRoom.on('patch', (patches) => {
+                        // console.log(typeof patches)
+                        // console.log(roomName, "will apply these changes:", patches)
+                    });
+                    gameRoom.on('update', (newState, patches) => {
+                        // console.log(typeof newState)
+                        // console.log(roomName, "new state", newState, "changes applied:", patches)
+                    });
+                }
+
+
+
+                //gameRoom.on('setup') ?
+            }
+
+        </script>
+
+    </body>
+</html>

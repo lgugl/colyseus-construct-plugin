@@ -1,0 +1,18 @@
+{
+  "name": "server-colyseus",
+  "version": "0.0.1",
+  "description": "Game server with Colyseus framework",
+  "main": "index.js",
+  "scripts": {
+    "start": "DEBUG=* supervisor -n exit -- index.js"
+  },
+  "author": "LudoFactory",
+  "license": "ISC",
+  "dependencies": {
+    "colyseus": "^0.4.2",
+    "koa": "^1.2.1"
+  },
+  "devDependencies": {
+    "debug-logger": "^0.4.1"
+  }
+}
