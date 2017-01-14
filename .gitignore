@@ -1,1 +1,5 @@
-*/node_modules/*
+.vagrant
+Vagrantfile
+.git
+node_modules
+*.autosave

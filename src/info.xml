@@ -3,7 +3,7 @@
     <type>plugin</type>
     <name>Colyseus</name>
     <version>1.0</version>
-    <author>LF</author>
+    <author>Loïc Guglielmino</author>
     <website></website>
     <documentation></documentation>
     <description>Colyseus client adapter for Construct 2.</description>

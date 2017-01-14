@@ -1,4 +1,4 @@
 var debugLogger = require('debug-logger');
-module.exports = (name = 'master') => {
+module.exports = (name = 'app') => {
     return debugLogger(name);
 };

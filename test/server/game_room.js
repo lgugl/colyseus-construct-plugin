@@ -1,7 +1,5 @@
 var Room = require('colyseus').Room
-    , debug = require('./util/debug')
-
-    , log = debug('gameRoom')
+  , log = require('./util/debug')('game-room')
 
 class GameRoom extends Room {
 
@@ -9,7 +7,7 @@ class GameRoom extends Room {
     super( options )
 
     // Broadcast patched state to all connected clients at 20fps (50ms)
-    this.setPatchRate( 2000 )
+    // this.setPatchRate( 2000 )
 
     // Call game simulation at 60fps (16.6ms)
     // this.setSimulationInterval( this.tick.bind(this), 1000 / 60 )

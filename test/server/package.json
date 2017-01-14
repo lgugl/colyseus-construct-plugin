@@ -1,0 +1,18 @@
+{
+  "name": "server-colyseus",
+  "version": "1.0.0",
+  "description": "Simple game server with Colyseus framework",
+  "main": "index.js",
+  "scripts": {
+    "start": "DEBUG=* ./node_modules/.bin/supervisor -i node_modules -n exit -- index.js"
+  },
+  "author": "Loïc Guglielmino",
+  "license": "MIT",
+  "dependencies": {
+    "colyseus": "^0.4.7"
+  },
+  "devDependencies": {
+    "debug-logger": "^0.4.1",
+    "supervisor": "^0.12.0"
+  }
+}
