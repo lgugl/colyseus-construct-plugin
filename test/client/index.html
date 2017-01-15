@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Client Colyseus</title>
-        <script type="text/javascript" src="dist/colyseus.min.js"></script>
+        <script type="text/javascript" src="dist/colyseus.js"></script>
     </head>
     <body>
         <h1>Client Colyseus</h1>
@@ -51,9 +51,9 @@
                 var roomName = "game_room"
                 var gameRoom
 
-                var client = new Colyseus('ws://192.168.33.10:3000')
+                var client = new Colyseus.Client('ws://192.168.33.10:3000')
 
-                client.onopen = () => {
+                client.onOpen.add(() => {
                     let id = idHandler.get()
                     console.log(client.id, "connected! (previous id: "+id+")")
 
@@ -62,43 +62,39 @@
 
                     idHandler.set(client.id)
 
-                }
-                client.onmessage = (event) => {
+                })
+                client.onMessage.add((event) => {
                     console.log("client received message!", event)
-                };
-                client.onclose = (event) => {
+                });
+                client.onClose.add((event) => {
                     console.log("closing connection...", event)
                     client.close()
-                }
-                client.onreconnect = (event) => {
-                    console.log("RECONNECTION")
-                    console.log(event)
-                }
-                client.onerror = (err) => {
+                })
+                client.onError.add((err) => {
                     console.log("ERROR")
                     console.log(err)
-                }
+                })
 
                 //cf. websocket.js (https://github.com/gamestdio/websocket.js)
 
                 function initEvent () {
-                    gameRoom.on('join', () => {
+                    gameRoom.onJoin.add(() => {
                         console.log(client.id, "joined", roomName)
                     });
-                    gameRoom.on('error', () => {
+                    gameRoom.onError.add(() => {
                         console.log(client.id, "couldn't join", roomName)
                     });
-                    gameRoom.on('leave', () => {
+                    gameRoom.onLeave.add(() => {
                         console.log(client.id, "leaved", roomName)
                     });
-                    gameRoom.on('data', (data) => {
+                    gameRoom.onData.add((data) => {
                         console.log(client.id, "received on", roomName, ":", data)
                     });
-                    gameRoom.on('patch', (patches) => {
+                    /*gameRoom.onPatch.add((patches) => {
                         // console.log(typeof patches)
                         // console.log(roomName, "will apply these changes:", patches)
-                    });
-                    gameRoom.on('update', (newState, patches) => {
+                    });*/
+                    gameRoom.onUpdate.add((newState, patches) => {
                         // console.log(typeof newState)
                         // console.log(roomName, "new state", newState, "changes applied:", patches)
                     });

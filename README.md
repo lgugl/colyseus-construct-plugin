@@ -14,5 +14,3 @@ Drag and drop it in Construct to install.
 To launch the server (need NodeJS and NPM):
 > npm install  
 > npm start  
-
-@TODO: Update test files accordingly.
