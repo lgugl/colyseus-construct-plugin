@@ -77,7 +77,7 @@ AddCondition(9, cf_trigger, "On leave", "Room", "On room left", "Triggered when.
 
 AddCondition(10, cf_trigger, "On data", "Room", "On room data", "Triggered when.", "OnRoomData");
 
-AddCondition(11, cf_trigger, "On patch", "Room", "On room patch", "Triggered when.", "OnRoomPatch");
+// AddCondition(11, cf_trigger, "On patch", "Room", "On room patch", "Triggered when.", "OnRoomPatch");
 
 AddCondition(12, cf_trigger, "On update", "Room", "On room update", "Triggered when.", "OnRoomUpdate");
 

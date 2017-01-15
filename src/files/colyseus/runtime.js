@@ -226,9 +226,9 @@ cr.plugins_.Colyseus = function(runtime)
 
 		try {
 			if (requireProtocol_ === "")
-				this.client = new Colyseus(url_);
+				this.client = new Colyseus.Client(url_);
 			else
-				this.client = new Colyseus(url_, requireProtocol_);
+				this.client = new Colyseus.Client(url_, requireProtocol_);
 		}
 		catch (e) {
 			this.client = null;
@@ -238,7 +238,7 @@ cr.plugins_.Colyseus = function(runtime)
 		}
 
 		// Events
-		this.client.onopen = function () {
+		this.client.onOpen.add(function () {
 			if (requireProtocol_.length && self.client.protocol.indexOf(requireProtocol_) === -1) {
 				self.errorMsg = "WebSocket required protocol '" + requireProtocol_ + "' not supported by server";
 				self.runtime.trigger(pluginProto.cnds.OnError, self);
@@ -247,28 +247,25 @@ cr.plugins_.Colyseus = function(runtime)
 				self.clientId = self.client.id;//save client ID
 				self.runtime.trigger(pluginProto.cnds.OnOpened, self);
 			}
-		};
-		this.client.onclose = function (e) {
+		});
+		this.client.onClose.add(function (e) {
 			self.closeCode = e["code"] || 0;
 			self.closeReason = e["reason"] || "";
 			self.client.close();
 			self.runtime.trigger(pluginProto.cnds.OnClosed, self);
-		};
-		this.client.onmessage = function (msg) {
+		});
+		this.client.onMessage.add(function (msg) {
 			self.messageText = msg;
 			self.runtime.trigger(pluginProto.cnds.OnMessage, self);
-		};
-		this.client.onerror = function (err) {
+		});
+		this.client.onError.add(function (err) {
 			if (cr.is_string(err))
 				self.errorMsg = err;
 			// else
 			// 	self.errorMsg = (err && cr.is_string(err.data) ? err.data : "");
 
 			self.runtime.trigger(pluginProto.cnds.OnError, self);
-		};
-		this.client.onreconnect = function (/*???*/) {
-			// ???
-		};
+		});
 	};
 
 	Acts.prototype.Close = function ()
@@ -309,26 +306,26 @@ cr.plugins_.Colyseus = function(runtime)
 		}
 
 		// Events
-		this.room.on('join', function () {
+		this.room.onJoin.add(function () {
 			self.runtime.trigger(pluginProto.cnds.OnRoomJoined, self);
 		});
-		this.room.on('error', function (err) {
+		this.room.onError.add(function (err) {
 			if (cr.is_string(err))
 				self.errorMsg = err;
 			self.runtime.trigger(pluginProto.cnds.OnError, self);//or OnRoomError
 		});
-		this.room.on('leave', function () {
+		this.room.onLeave.add(function () {
 			self.runtime.trigger(pluginProto.cnds.OnRoomLeft, self);
 		});
-		this.room.on('data', function (data) {
+		this.room.onData.add(function (data) {
 			self.roomData = data;
 			self.runtime.trigger(pluginProto.cnds.OnRoomData, self);
 		});
-		this.room.on('patch', function (patches) {
+		/*this.room.onPatch.add(function (patches) {
 			self.roomPatches = patches;
 			self.runtime.trigger(pluginProto.cnds.OnRoomPatch, self);
-		});
-		this.room.on('update', function (state, patches) {
+		});*/
+		this.room.onUpdate.add(function (state, patches) {
 			self.roomState = state;
 			self.roomPatches = patches || null;
 			self.runtime.trigger(pluginProto.cnds.OnRoomUpdate, self);
