@@ -1,5 +1,7 @@
 ## Colyseus client plugin for Construct 2
 
+Used version 0.6.0 of ColyseusJS.  
+
 Colyseus is a game server framework for NodeJS.  
 http://gamestd.io/colyseus/  
 
@@ -16,3 +18,5 @@ To launch the test server (need NodeJS and NPM):
 > cd test/server  
 > npm install  
 > npm start  
+
+nb: if supervisor .bin files were not created, launch "npm install supervisor"
