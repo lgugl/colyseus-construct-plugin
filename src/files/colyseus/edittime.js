@@ -5,8 +5,8 @@ function GetPluginSettings()
 		"id":			"Colyseus",				// this is used to identify this plugin and is saved to the project; never change it
 		"version":		"1.0",					// (float in x.y format) Plugin version - C2 shows compatibility warnings based on this
 		"description":	"Client API of Colyseus, the minimalist Multiplayer Game Server for Node.js.",
-		"author":		"LudoFactory",
-		"help url":		"http://gamestd.io/colyseus",
+		"author":		"Loïc Guglielmino",
+		"help url":		"https://github.com/polpoy/colyseus-construct-plugin",
 		"category":		"Web",				// Prefer to re-use existing categories, but you can set anything here
 		"type":			"object",				// either "world" (appears in layout and is drawn), else "object"
 		"rotatable":	false,					// only used when "type" is "world".  Enables an angle property on the object.
@@ -71,17 +71,13 @@ AddCondition(6, cf_none, "Is supported", "Connection", "Is WebSocket supported",
 
 AddCondition(7, cf_trigger, "On joined", "Room", "On room joined", "Triggered when the client successfully joins a room.", "OnRoomJoined");
 
-// AddCondition(8, cf_trigger, "On error", "Room", "On room error", "Triggered when.", "OnRoomError");
+AddCondition(8, cf_trigger, "On error", "Room", "On room error", "Triggered when.", "OnRoomError");
 
 AddCondition(9, cf_trigger, "On leave", "Room", "On room left", "Triggered when.", "OnRoomLeft");
 
 AddCondition(10, cf_trigger, "On data", "Room", "On room data", "Triggered when.", "OnRoomData");
 
-// AddCondition(11, cf_trigger, "On patch", "Room", "On room patch", "Triggered when.", "OnRoomPatch");
-
-AddCondition(12, cf_trigger, "On update", "Room", "On room update", "Triggered when.", "OnRoomUpdate");
-
-// AddCondition(13, cf_trigger, "On setup", "Room", "On room setup", "Triggered when.", "OnRoomSetup");
+AddCondition(11, cf_trigger, "On update", "Room", "On room update", "Triggered when.", "OnRoomUpdate");
 
 
 ////////////////////////////////////////
@@ -112,7 +108,7 @@ AddAction(3, af_none, "Join", "Room", "Join room <i>{0}</i> (with options {1})."
 AddAction(4, af_none, "Leave", "Room", "Leave room", "Leave the room.", "LeaveRoom");
 
 AddStringParam("Data", "A text string to send to the room.");
-AddAction(5, af_none, "Send", "Room", "Send text <i>{0}</i> to a room", "Send text to the a room.", "SendToRoom");
+AddAction(5, af_none, "Send", "Room", "Send text <i>{0}</i> to a room", "Send text to the room.", "SendToRoom");
 
 ////////////////////////////////////////
 // Expressions

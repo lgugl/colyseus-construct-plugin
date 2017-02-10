@@ -181,10 +181,10 @@ cr.plugins_.Colyseus = function(runtime)
 		return true;
 	};
 
-	// Cnds.prototype.OnRoomError = function ()
-	// {
-	// 	return true;
-	// };
+	Cnds.prototype.OnRoomError = function ()
+	{
+		return true;
+	};
 
 	Cnds.prototype.OnRoomLeft = function ()
 	{
@@ -249,8 +249,8 @@ cr.plugins_.Colyseus = function(runtime)
 			}
 		});
 		this.client.onClose.add(function (e) {
-			self.closeCode = e["code"] || 0;
-			self.closeReason = e["reason"] || "";
+			self.closeCode = e && e["code"] || 0;
+			self.closeReason = e && e["reason"] || "";
 			self.client.close();
 			self.runtime.trigger(pluginProto.cnds.OnClosed, self);
 		});
@@ -261,8 +261,6 @@ cr.plugins_.Colyseus = function(runtime)
 		this.client.onError.add(function (err) {
 			if (cr.is_string(err))
 				self.errorMsg = err;
-			// else
-			// 	self.errorMsg = (err && cr.is_string(err.data) ? err.data : "");
 
 			self.runtime.trigger(pluginProto.cnds.OnError, self);
 		});
@@ -312,7 +310,7 @@ cr.plugins_.Colyseus = function(runtime)
 		this.room.onError.add(function (err) {
 			if (cr.is_string(err))
 				self.errorMsg = err;
-			self.runtime.trigger(pluginProto.cnds.OnError, self);//or OnRoomError
+			self.runtime.trigger(pluginProto.cnds.OnRoomError, self);//or OnError
 		});
 		this.room.onLeave.add(function () {
 			self.runtime.trigger(pluginProto.cnds.OnRoomLeft, self);
@@ -321,10 +319,6 @@ cr.plugins_.Colyseus = function(runtime)
 			self.roomData = data;
 			self.runtime.trigger(pluginProto.cnds.OnRoomData, self);
 		});
-		/*this.room.onPatch.add(function (patches) {
-			self.roomPatches = patches;
-			self.runtime.trigger(pluginProto.cnds.OnRoomPatch, self);
-		});*/
 		this.room.onUpdate.add(function (state, patches) {
 			self.roomState = state;
 			self.roomPatches = patches || null;
