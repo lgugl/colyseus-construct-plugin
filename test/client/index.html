@@ -7,7 +7,10 @@
     </head>
     <body>
         <h1>Client Colyseus</h1>
-        <button onclick="connect()">Connect</button>
+        <p><button onclick="connect()">Connect</button></p>
+        <div class="actions">
+            <p><button onclick="ping()" disabled>Ping</button></p>
+        </div>
         <script type="text/javascript">
 
 
@@ -45,64 +48,89 @@
 
             }
 
+            class Client
+            {
+                constructor() {
+                    this.client;
+                    this.gameRoom;
+                    this.roomName = "game_room"
+                }
 
-            var connect = () => {
+                connect() {
+                    this.client = new Colyseus.Client('ws://192.168.33.10:8081')
 
-                var roomName = "game_room"
-                var gameRoom
+                    this.client.onOpen.add(() => {
+                        let id = idHandler.get()
+                        console.log(this.client.id, "connected! (previous id: "+id+")")
 
-                var client = new Colyseus.Client('ws://192.168.33.10:3000')
+                        this.gameRoom = this.client.join(this.roomName, {uid: id, score: 0})
+                        this.initEvent()
 
-                client.onOpen.add(() => {
-                    let id = idHandler.get()
-                    console.log(client.id, "connected! (previous id: "+id+")")
+                        idHandler.set(this.client.id)
 
-                    gameRoom = client.join(roomName, {uid: id, score: 0})
-                    initEvent()
+                        // activate actions
+                        var buttons = document.querySelectorAll('.actions button');
+                        console.log(buttons);
+                        for(let button of buttons) {
+                            button.disabled = false
+                        }
 
-                    idHandler.set(client.id)
-
-                })
-                client.onMessage.add((event) => {
-                    console.log("client received message!", event)
-                });
-                client.onClose.add((event) => {
-                    console.log("closing connection...", event)
-                    client.close()
-                })
-                client.onError.add((err) => {
-                    console.log("ERROR")
-                    console.log(err)
-                })
-
-                //cf. websocket.js (https://github.com/gamestdio/websocket.js)
-
-                function initEvent () {
-                    gameRoom.onJoin.add(() => {
-                        console.log(client.id, "joined", roomName)
+                    })
+                    this.client.onMessage.add((event) => {
+                        console.log("Received message:", event)
                     });
-                    gameRoom.onError.add(() => {
-                        console.log(client.id, "couldn't join", roomName)
+                    this.client.onClose.add((event) => {
+                        console.log("closing connection...", event)
+                        this.client.close()
+                    })
+                    this.client.onError.add((err) => {
+                        console.log("ERROR")
+                        console.log(err)
+                    })
+
+                    //cf. websocket.js (https://github.com/gamestdio/websocket.js)
+
+
+
+                    //this.gameRoom.on('setup') ?
+                }
+
+                initEvent () {
+                    this.gameRoom.onJoin.add(() => {
+                        console.log("ROOM ONJOIN:", this.client.id, "joined", this.roomName)
                     });
-                    gameRoom.onLeave.add(() => {
-                        console.log(client.id, "leaved", roomName)
+                    this.gameRoom.onError.add(() => {
+                        console.log("ROOM ONERROR:", this.client.id, "couldn't join", this.roomName)
                     });
-                    gameRoom.onData.add((data) => {
-                        console.log(client.id, "received on", roomName, ":", data)
+                    this.gameRoom.onLeave.add(() => {
+                        console.log("ROOM ONLEAVE:", this.client.id, "leaved", this.roomName)
                     });
-                    /*gameRoom.onPatch.add((patches) => {
+                    this.gameRoom.onData.add((data) => {
+                        console.log("ROOM ONDATA:", this.client.id, "received on", this.roomName+":", data)
+                    });
+                    /*this.gameRoom.onPatch.add((patches) => {
                         // console.log(typeof patches)
-                        // console.log(roomName, "will apply these changes:", patches)
+                        // console.log(this.roomName, "will apply these changes:", patches)
                     });*/
-                    gameRoom.onUpdate.add((newState, patches) => {
+                    this.gameRoom.onUpdate.add((newState, patches) => {
                         // console.log(typeof newState)
-                        // console.log(roomName, "new state", newState, "changes applied:", patches)
+                        // console.log(this.roomName, "new state", newState, "changes applied:", patches)
                     });
                 }
 
+                ping() {
+                    this.client.send("Ping")
+                }
+            }
 
+            var client = new Client()
 
-                //gameRoom.on('setup') ?
+            var connect = () => {
+                client.connect()
+            }
+
+            var ping = () => {
+                this.client.ping()
             }
 
         </script>

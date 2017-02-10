@@ -71,7 +71,7 @@ class GameRoom extends Room {
     log.info(client.id, "joined room", this.options.roomId, "with a score of", client.score)
     log.trace("there is/are", this.clients.length, "client(s) in this room")
     // this.send(client, "Hello " + client.id)
-    this.broadcast("A new challenger ("+client.id+") has just enter the game!")
+    this.broadcast("A new challenger ("+client.id+") has just enter.")
 
 
     client.score++
@@ -79,6 +79,13 @@ class GameRoom extends Room {
 
   onMessage (client, data) {
     log(client.id, "sent message on room:", data)
+    switch (data) {
+      case "Ping":
+        this.send(client, "Pong")
+        break;
+      default:
+        break;
+    }
   }
 
   tick () {
@@ -116,7 +123,7 @@ class GameRoom extends Room {
   }
 
   onDispose () {
-      log.info("Room",this.options.roomId,"is empty");
+    log.info("Room",this.options.roomId,"is empty");
   }
 
 }
