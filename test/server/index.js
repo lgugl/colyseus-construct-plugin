@@ -2,7 +2,7 @@
 
 var colyseus = require('colyseus')
   , log = require('./util/debug')('server')
-  , port = 8081
+  , port = 3000
   , gameServer = new colyseus.Server({port: port});
 
 let gameRoomOptions = {

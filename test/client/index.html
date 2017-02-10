@@ -2,136 +2,168 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>Client Colyseus</title>
+        <title>Colyseus client</title>
         <script type="text/javascript" src="dist/colyseus.js"></script>
     </head>
     <body>
-        <h1>Client Colyseus</h1>
-        <p><button onclick="connect()">Connect</button></p>
-        <div class="actions">
-            <p><button onclick="ping()" disabled>Ping</button></p>
-        </div>
+        <h1>Colyseus client</h1>
+        <p><button onclick="connect()" id="btn-connect">Connect</button></p>
+        <fieldset id="roomActions">
+            <legend>Room</legend>
+            <p><button onclick="join()" id="btn-join" disabled>Join</button></p>
+            <p><button onclick="ping()" class="btn-action" disabled>Ping</button></p>
+            <p><button onclick="poke()" class="btn-action" disabled>Poke</button></p>
+            <p><button onclick="leave()" class="btn-action" disabled>Leave</button></p>
+        </fieldset>
+        <p><button onclick="disconnect()" id="btn-disconnect" disabled>Disconnect</button></p>
         <script type="text/javascript">
+            
+            var connect = () => {
+                client.connect('ws://192.168.33.10', 3000)
+            }
 
+            var join = () => {
+                this.client.joinRoom()
+            }
 
-            // var id = 0
-            // try {
-            //     let store = window.sessionStorage
-            //     store.id = store.id || Math.round(Math.random() * Math.pow(10, 15))
-            //     id = store.id
-            // }
-            // catch(e) {
-            //     console.log('browser storage not available')
-            // }
+            var ping = () => {
+                this.client.ping()
+            }
 
-            var idHandler = {
+            var poke = () => {
+                this.client.pingToAll()
+            }
 
-                get: () => {
-                    try {
-                        let store = window.localStorage
-                        return store.id || 0
-                    }
-                    catch(e) {
-                        console.log("browser storage not available")
-                    }
-                }
+            var leave = () => {
+                this.client.leave()
+            }
 
-                ,set: (id) => {
-                    try {
-                        let store = window.localStorage
-                        store.id = id
-                    }
-                    catch(e) {
-                        console.log("browser storage not available")
-                    }
-                }
-
+            var disconnect = () => {
+                this.client.disconnect()
             }
 
             class Client
             {
                 constructor() {
                     this.client;
-                    this.gameRoom;
+                    this.gameRoom
                     this.roomName = "game_room"
+
+                    this.buttonConnect = document.querySelector('#btn-connect')
+                    this.buttonDisconnect = document.querySelector('#btn-disconnect')
+                    this.buttonJoin = document.querySelector('#btn-join')
+                    this.buttonsAction = document.querySelectorAll('#roomActions .btn-action');
                 }
 
-                connect() {
-                    this.client = new Colyseus.Client('ws://192.168.33.10:8081')
+                connect(host, port) {
+                    this.client = new Colyseus.Client(host+':'+port)
 
-                    this.client.onOpen.add(() => {
-                        let id = idHandler.get()
-                        console.log(this.client.id, "connected! (previous id: "+id+")")
+                    this.client.onOpen.add((event) => {
+                        console.log("Connected with Id", this.client.id, event)
 
-                        this.gameRoom = this.client.join(this.roomName, {uid: id, score: 0})
-                        this.initEvent()
-
-                        idHandler.set(this.client.id)
-
-                        // activate actions
-                        var buttons = document.querySelectorAll('.actions button');
-                        console.log(buttons);
-                        for(let button of buttons) {
-                            button.disabled = false
-                        }
-
+                        // disabled connect button
+                        this.toggleActions('connect')
+                        // this.joinRoom()
                     })
                     this.client.onMessage.add((event) => {
                         console.log("Received message:", event)
                     });
                     this.client.onClose.add((event) => {
-                        console.log("closing connection...", event)
+                        console.log("Closing connection...", event)
                         this.client.close()
+
+                        this.toggleActions('disconnect')
                     })
-                    this.client.onError.add((err) => {
+                    this.client.onError.add(() => {
                         console.log("ERROR")
-                        console.log(err)
                     })
 
                     //cf. websocket.js (https://github.com/gamestdio/websocket.js)
 
-
-
-                    //this.gameRoom.on('setup') ?
                 }
 
-                initEvent () {
+                joinRoom() {
+                    if (this.client && this.client.reconnectEnabled) {
+                        this.gameRoom = this.client.join(this.roomName, {name: "J.Doe"})
+                        this.initEvent()
+                    }
+                }
+
+                initEvent (gameRoom) {
                     this.gameRoom.onJoin.add(() => {
-                        console.log("ROOM ONJOIN:", this.client.id, "joined", this.roomName)
+                        console.log("Room onJoin:", this.client.id, "joined", this.roomName)
+                        // enabled actions
+                        this.toggleActions('join')
                     });
                     this.gameRoom.onError.add(() => {
-                        console.log("ROOM ONERROR:", this.client.id, "couldn't join", this.roomName)
+                        console.log("Room onError:", this.client.id, "couldn't join", this.roomName)
                     });
                     this.gameRoom.onLeave.add(() => {
-                        console.log("ROOM ONLEAVE:", this.client.id, "leaved", this.roomName)
+                        console.log("Room onLeave:", this.client.id, "leaved", this.roomName)
+                        // disabled actions
+                        this.toggleActions('leave')
                     });
                     this.gameRoom.onData.add((data) => {
-                        console.log("ROOM ONDATA:", this.client.id, "received on", this.roomName+":", data)
+                        console.log("Room onData:", this.client.id, "received from", this.roomName+":", data)
                     });
-                    /*this.gameRoom.onPatch.add((patches) => {
-                        // console.log(typeof patches)
-                        // console.log(this.roomName, "will apply these changes:", patches)
-                    });*/
-                    this.gameRoom.onUpdate.add((newState, patches) => {
-                        // console.log(typeof newState)
-                        // console.log(this.roomName, "new state", newState, "changes applied:", patches)
+                    this.gameRoom.onUpdate.add((newState) => {
+                        console.log(this.roomName, "new state", newState, "changes applied")
+                        //this.gameRoom.state.data
                     });
                 }
 
                 ping() {
-                    this.client.send("Ping")
+                    // this.client.send("Ping")
+                    this.gameRoom.send("Ping")
+                }
+
+                pingToAll() {
+                    // this.client.send("Poke")
+                    this.gameRoom.send("Poke")
+                }
+
+                leave() {
+                    this.gameRoom.leave()
+                }
+
+                disconnect() {
+                    this.client.close()
+                }
+
+                toggleActions(status) {
+                    if (status == 'leave') {
+                        this.buttonsAction.forEach((btn) => {
+                            btn.disabled = true
+                        })
+                        this.buttonJoin.disabled = false
+                    }
+                    else if (status == 'join') {
+                        this.buttonsAction.forEach((btn) => {
+                            btn.disabled = false
+                        })
+                        this.buttonJoin.disabled = true
+                    }
+                    else if (status == 'disconnect') {
+                        this.buttonsAction.forEach((btn) => {
+                            btn.disabled = true
+                        })
+                        this.buttonJoin.disabled = true
+                        this.buttonConnect.disabled = false
+                        this.buttonDisconnect.disabled = true
+                    }
+                    else if (status == 'connect') {
+                        this.buttonsAction.forEach((btn) => {
+                            btn.disabled = true
+                        })
+                        this.buttonJoin.disabled = false
+                        this.buttonConnect.disabled = true
+                        this.buttonDisconnect.disabled = false
+                    }
                 }
             }
 
             var client = new Client()
 
-            var connect = () => {
-                client.connect()
-            }
-
-            var ping = () => {
-                this.client.ping()
-            }
 
         </script>
 

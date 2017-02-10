@@ -7,98 +7,49 @@ class GameRoom extends Room {
     super( options )
 
     // Broadcast patched state to all connected clients at 20fps (50ms)
-    // this.setPatchRate( 2000 )
+    // this.setPatchRate(100)//why it doesn't trigger onUpdate event?
 
     // Call game simulation at 60fps (16.6ms)
-    // this.setSimulationInterval( this.tick.bind(this), 1000 / 60 )
+    this.setSimulationInterval( this.tick.bind(this), 1000 / 60 )
 
-    this.setState({})
+    this.setState({time: 0})
 
     this.time = 0
     this.timer = 0
   }
 
   requestJoin(options) {
-    // reconnection to the room
-
-    for(let client of this.clients) {
-        if (client.id == options.uid) {
-            log.trace('client', options.uid, 'found on room', this.options.roomId)
-            return true;
-        }
-    }
-
-    // log.trace('request with options', options)
-    // this.clients.forEach((client) => {
-    //   if (client.id == options.uid) {
-    //       log.trace('client', options.uid, 'found on room', this.options.roomId)
-    //       // to keep the client's current score
-    //       this.foo = {
-    //           score: client.score
-    //       }
-    //       this._onLeave(client, false)
-    //       return true;
-    //   }
-    // })
 
     // only allow a max number of clients per room
     return this.clients.length < this.options.maxClients;
   }
 
   onJoin (client, data) {
+    log.info(client.id, "joined room", this.options.roomId)
+    log.trace("There is/are", this.clients.length, "client(s) in this room")
 
-        // to keep the client's current score on reconnection
-        let score;
-        // try to find this client and remove it
-        // (so a very short moment there is one more client in the room
-        // and if somebody try to connect in the exactly same moment
-        // the room may be full)
-        this.clients.forEach((val) => {
-          if (val.id == data.uid) {
-              score = val.score
-              this._onLeave(val, false)
-          }
-        })
-        // // add UID to the client object
-        // client.uid = data.uid
-        client.score = score || data.score
-
-
-
-        // client.score = this.foo.score || 0
-
-
-    log.info(client.id, "joined room", this.options.roomId, "with a score of", client.score)
-    log.trace("there is/are", this.clients.length, "client(s) in this room")
-    // this.send(client, "Hello " + client.id)
-    this.broadcast("A new challenger ("+client.id+") has just enter.")
-
-
-    client.score++
+    this.send(client, "Hello " + data.name)
+    this.broadcastOthers(client, "A new challenger has just enter ("+client.id+")")
   }
 
   onMessage (client, data) {
-    log(client.id, "sent message on room:", data)
+    log(client.id, "sent a message:", data)
     switch (data) {
+
       case "Ping":
         this.send(client, "Pong")
         break;
+
+      case "Poke":
+        this.broadcastOthers(client, "Poke (by "+client.id+")")
+        break;
+
       default:
         break;
     }
   }
 
   tick () {
-    //
-    // This is your 'game loop'.
-    // Inside function you'll have to run the simulation of your game.
-    //
-    // You should:
-    // - move entities
-    // - check for collisions
-    // - update the state
-    //
-
     let now = Date.now()
     if (!this.time) {
         this.time = now
@@ -108,22 +59,30 @@ class GameRoom extends Room {
     this.time = now
 
     this.timer += dt
-    if (this.timer >= 1000) {
+    if (this.timer >= 4000) {
         this.timer = 0
-        log('tick',dt)
+        // log('tick',dt, this.time)
+        this.setState({time: this.time})
+        this.clients.forEach((client) => {
+          this.sendState(client)
+        })
     }
-
-
-
-
   }
 
   onLeave (client) {
-    log.info(client.id, "left room")
+    log.info("Client",client.id,"left the room",this.options.roomId)
   }
 
   onDispose () {
     log.info("Room",this.options.roomId,"is empty");
+  }
+
+  broadcastOthers (client, data) {
+    for(let clt of this.clients) {
+      if (clt.id != client.id) {
+        this.send(clt, data)
+      }
+    }
   }
 
 }

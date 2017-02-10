@@ -4,7 +4,7 @@
   "description": "Simple game server with Colyseus framework",
   "main": "index.js",
   "scripts": {
-    "start": "DEBUG=* ./node_modules/.bin/supervisor -i node_modules -n exit -- index.js"
+    "start": "DEBUG=* ./node_modules/.bin/supervisor -i node_modules -- index.js"
   },
   "author": "Loïc Guglielmino",
   "license": "MIT",
